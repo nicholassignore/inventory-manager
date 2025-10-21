@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 
 const Form = () => {
     const [items, setItems] = useState([]);
+    const [transactions, setTransactions] = useState([]);
 
     useEffect(() => {
         fetch("http://localhost:8000/api/get-items.php")
@@ -11,12 +12,18 @@ const Form = () => {
             })
     }, []);
 
-    const [transactions, setTransactions] = useState([
-        { id: 1, name: "Fotoshooting Leonie", values: {} },
-        { id: 2, name: "Fotoshooting Leon", values: {} },
-        { id: 3, name: "Fotoshooting Amar", values: {} },
-        { id: 4, name: "Fotoshooting Sadir", values: {} },
-    ]);
+    useEffect(() => {
+            fetch("http://localhost:8000/api/get-transactions.php")
+                .then(res => res.json())
+                .then(data => {
+                    const safe = (data.transactions || []).map(t => ({
+                        ...t,
+                        values: t.values || {}
+                    }))
+                    setTransactions(safe)
+                })
+    }, [])
+
 
     function sumUsed(itemId) {
         let total = 0;
@@ -29,29 +36,51 @@ const Form = () => {
         return total;
     }
 
+    function getAvailable(itemId, transactionId, transactions, items) {
+        const item = items.find(i => i.id === itemId);
+        if (!item) return 0;
+
+        let otherSum = 0;
+        for (const t of transactions) {
+            if (t.id === transactionId) continue;
+            otherSum += Number(t.values?.[itemId] || 0);
+        }
+        return Math.max(0, item.initialStock - otherSum);
+    }
+
+    function handleSaveToServer() {
+        const payload = { transactions };
+
+        fetch("http://localhost:8000/api/save-transactions.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ transactions }),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data?.success) {
+                    console.log("Save successful ✅");
+                } else {
+                    console.log("Save failed ❌", data);
+
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+                console.log("Network error while saving ❌");
+            });
+    }
+
     const handleValueChange = (transactionId, itemId, event) => {
-            const value = Number(event.target.value);
+            const value = Math.max(0, Number(event.target.value) || 0);
 
             const item = items.find((i) => i.id === itemId);
             if (!item) return;
 
-            let otherSum = 0;
+        const available = getAvailable(itemId, transactionId, transactions, items);
 
-            for (let i = 0; i < transactions.length; i++) {
-                const t = transactions[i];
 
-                if (t.id === transactionId) {
-                    continue;
-                }
-
-                const usedValue = t.values && t.values[itemId] ? Number(t.values[itemId]) : 0;
-
-                otherSum += usedValue;
-            }
-
-            const available = item.initialStock - otherSum;
-
-            const limitedValue = Math.min(value, available);
+        const limitedValue = Math.min(value, available);
 
             setTransactions((prev) =>
                 prev.map((t) =>
@@ -94,17 +123,23 @@ const Form = () => {
             {transactions.map((transaction) => (
                 <tr key={transaction.id}>
                     <td>{transaction.name}</td>
-                    {items.map((item) => (
-                        <td key={item.id}>
-                            <input
-                                type="number"
-                                min="0"
-                                max={item.initialStock}
-                                value={transaction.values[item.id] || 0}
-                                onChange={(event) => handleValueChange(transaction.id, item.id, event)}
-                            />
-                        </td>
-                    ))}
+                    {items.map((item) => {
+                        const availableForThisCell = getAvailable(item.id, transaction.id, transactions, items);
+                        const currentValue = Number(transaction.values?.[item.id] || 0);
+                        return (
+                            <td key={item.id}>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max={availableForThisCell}
+                                    value={currentValue}
+                                    title={`Max: ${availableForThisCell}`}
+                                    disabled={availableForThisCell === 0 && currentValue === 0}
+                                    onChange={(event) => handleValueChange(transaction.id, item.id, event)}
+                                />
+                            </td>
+                        );
+                    })}
                 </tr>
             ))}
             </tbody>
@@ -125,6 +160,7 @@ const Form = () => {
             </tr>
             </tfoot>
         </table>
+            <button onClick={handleSaveToServer}>Save</button>
     </div>
 }
 

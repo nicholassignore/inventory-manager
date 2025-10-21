@@ -1,0 +1,29 @@
+[
+    {
+        "id": 1,
+        "name": "Fotoshooting Leonie",
+        "values": {
+            "taschen_rosa_grau": 133,
+            "taschen_rosa_schwarz": 32
+        }
+    },
+    {
+        "id": 2,
+        "name": "Fotoshooting Leon",
+        "values": []
+    },
+    {
+        "id": 3,
+        "name": "Fotoshooting Amar",
+        "values": {
+            "taschen_rosa_grau": 35
+        }
+    },
+    {
+        "id": 4,
+        "name": "Fotoshooting Sadir",
+        "values": {
+            "taschen_rosa_grau": 8
+        }
+    }
+]
