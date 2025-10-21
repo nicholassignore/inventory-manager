@@ -1,17 +1,15 @@
 import React, {useEffect, useState} from "react";
 
 const Form = () => {
+    const [items, setItems] = useState([]);
 
     useEffect(() => {
         fetch("http://localhost:8000/api/get-items.php")
             .then(res => res.json())
             .then(data => {
-                console.log(data.items);
                 setItems(data.items);
             })
     }, []);
-
-    const [items, setItems] = useState([]);
 
     const [transactions, setTransactions] = useState([
         { id: 1, name: "Fotoshooting Leonie", values: {} },

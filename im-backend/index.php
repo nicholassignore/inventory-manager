@@ -1,3 +1,3 @@
 <?php
 
-echo "PHP backend works";
+echo "Hello from the IM Backend!";
