@@ -1,0 +1,7 @@
+[
+{ "id": "taschen_rosa_grau", "name": "Taschen rosa mit grauer Schrift", "initialStock": 176 },
+{ "id": "taschen_rosa_schwarz", "name": "Taschen rosa mit schwarzer Schrift", "initialStock": 115 },
+{ "id": "magazin_alt", "name": "Magazin ALT", "initialStock": 220 },
+{ "id": "magazin_neu", "name": "Magazin NEU", "initialStock": 27 },
+{ "id": "flyer", "name": "Flyer", "initialStock": 110 }
+]

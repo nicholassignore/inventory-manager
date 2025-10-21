@@ -1,15 +1,17 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 
 const Form = () => {
 
+    useEffect(() => {
+        fetch("http://localhost:8000/api/get-items.php")
+            .then(res => res.json())
+            .then(data => {
+                console.log(data.items);
+                setItems(data.items);
+            })
+    }, []);
 
-    const [items] = useState([
-        { id: "taschen_rosa_grau", name: "Taschen rosa mit grauer Schrift", initialStock: 176 },
-        { id: "taschen_rosa_schwarz", name: "Taschen rosa mit schwarzer Schrift", initialStock: 115 },
-        { id: "magazin_alt", name: "Magazin ALT", initialStock: 220 },
-        { id: "magazin_neu", name: "Magazin NEU", initialStock: 27 },
-        { id: "flyer", name: "Flyer", initialStock: 110 },
-    ]);
+    const [items, setItems] = useState([]);
 
     const [transactions, setTransactions] = useState([
         { id: 1, name: "Fotoshooting Leonie", values: {} },
